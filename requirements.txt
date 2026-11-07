@@ -1,0 +1,2 @@
+# 这个项目只用 Python 标准库，没有第三方依赖。
+# 留这个空文件是因为有些云平台（Render / Railway）会默认执行 pip install -r requirements.txt。

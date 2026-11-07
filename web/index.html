@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#12141a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<title>对战助手 · PokeMMO 随机 PvP</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%234f8cff'/%3E%3Cpath d='M4 16h24' stroke='%23101218' stroke-width='3'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23101218'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%23fff'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="boot" class="boot"><div class="spinner"></div><div id="bootText">正在加载精灵数据…</div></div>
+
+<div id="app" hidden>
+  <div id="updBanner" class="upd hidden">有新版本了，<button id="btnReload" class="btn-sm">点这里刷新</button></div>
+  <header class="topbar">
+    <div class="brand">⚔️ 对战助手</div>
+    <div class="turnbox" id="turnBox"></div>
+    <button class="icon-btn" id="btnMenu" aria-label="菜单">☰</button>
+  </header>
+
+  <main id="main">
+    <!-- ============ 队伍配置 ============ -->
+    <section id="viewSetup" class="view">
+      <div id="poolRow" class="pool-box"></div>
+      <div class="section-title"><span>我方队伍</span><small>4 只 · 场上 3 只可自由轮转</small></div>
+      <div id="mySlots" class="slot-list"></div>
+
+      <div class="section-title"><span>对手队伍</span><small>填你看到的即可，招式可以空着</small></div>
+      <div id="oppSlots" class="slot-list"></div>
+
+      <div class="setup-actions">
+        <button class="btn primary block" id="btnStart">开始对战 →</button>
+        <p class="hint">按游戏里的实际信息填。招式不确定时，助手会按该精灵最常见的强招估算。</p>
+      </div>
+    </section>
+
+    <!-- ============ 对战 ============ -->
+    <section id="viewBattle" class="view" hidden>
+      <div id="emptyBattle" class="empty">
+        <div class="empty-ico">🛡️</div>
+        <p>还没有开始对战</p>
+        <button class="btn primary" data-tab="setup">去配置队伍</button>
+      </div>
+
+      <div id="battleBody" hidden>
+        <div id="guideTip" class="guide" hidden>
+          <div class="g-row"><b>1</b><span>点下面「推荐」里的任意一张卡片 = 这回合让这只用这招</span></div>
+          <div class="g-row"><b>2</b><span>对手真正出的招，点右边的「对手出招」记下来（它出了没写过的招，也能现加）</span></div>
+          <div class="g-row"><b>3</b><span>最后点「结算回合」推进一回合</span></div>
+          <button class="linkbtn" id="btnGuideClose">知道了，不再显示</button>
+        </div>
+
+        <div class="section-title small"><span>对手 · 场上</span>
+          <span class="title-right">
+            <small id="oppAliveLabel"></small>
+            <button class="btn-mini" id="btnAddFoe">＋新精灵</button>
+            <button class="btn-mini" id="btnOppMove">对手出招 ▾</button>
+          </span>
+        </div>
+        <div id="oppRow" class="field-row"></div>
+
+        <div id="recoBox" class="reco-box"></div>
+
+        <div class="section-title small"><span>我方 · 场上</span><small id="myAliveLabel"></small></div>
+        <div id="myRow" class="field-row"></div>
+
+        <div class="actionbar">
+          <button class="btn btn-opp" id="btnOppAction"><span>② 对手出招</span><em id="oppActionLabel">自动（最坏）</em></button>
+          <button class="btn primary" id="btnResolve"><span>③ 结算回合</span></button>
+        </div>
+        <p class="hint abar-tip">① 先在上面推荐里点一张选招 → ② 对手出招（不确定就放自动）→ ③ 结算</p>
+        <div class="subbar">
+          <button class="linkbtn" id="btnUndo">↶ 撤销上回合</button>
+          <button class="linkbtn" id="btnFix">✎ 修正血量/状态</button>
+          <button class="linkbtn" id="btnEndGame">■ 结束本局</button>
+        </div>
+        <div id="battleLog" class="battle-log"></div>
+      </div>
+    </section>
+
+    <!-- ============ 说明 ============ -->
+    <section id="viewHelp" class="view" hidden>
+      <div class="help">
+        <h3>最快的录入方式：截图识别</h3>
+        <p>游戏里按 <b>Win + Shift + S</b> 框选精灵卡（名字和 4 个招式都要在里面），回到队伍页点
+          <b>📷 识图</b>，按 <b>Ctrl + V</b> 粘贴。两秒后自动认出精灵、招式、道具、特性，确认一下点
+          「全部填到对方 / 我方」就行。手机上点「选择图片」从相册选也可以。<br>
+          识别用的是 Windows 自带的文字识别（不联网、不花钱）；认错的字会按最接近的名字去猜，
+          猜不准的会标出来让你手动改。</p>
+
+        <h3>怎么用</h3>
+        <ol>
+          <li><b>队伍页</b>：把游戏里看到的 4 只我方精灵点进去（精灵、4 个招式、道具、特性）。对手的精灵也填上，招式不知道就留着。</li>
+          <li><b>对战页</b>：助手每回合给出前 3 个推荐和胜率估计。点一张卡就是你这回合要做的操作。</li>
+          <li>游戏里对手真正出完招后，点 <b>结算回合</b>。助手会按你选的"对手出招"（默认取对你不利的一招）推进一回合。</li>
+          <li>如果和游戏里实际的伤害不一样（暴击、miss、随机浮动），点 <b>修正血量/状态</b> 把真实数字填回去，下一回合的推荐会更准。</li>
+        </ol>
+
+        <h3>对战页的三个按钮在哪</h3>
+        <p>对战页从上到下是：<b>对手场上的精灵</b>（这一行右边有「对手出招 ▾」按钮）→ <b>推荐出招</b>（点卡片就是选它）
+          → <b>我方场上的精灵</b> → 最下面一排是「② 对手出招」和「③ 结算回合」。</p>
+        <p>要填对手这回合用了什么：点<b>对手那一行右边的「对手出招 ▾」</b>，或最下面那个「② 对手出招」，是一样的弹窗。<br>
+          他用了你没录过的招？弹窗里点<b>「＋ 直接选一个招式」</b>，直接搜招名选上——助手会自动把这一招记进他的配招里，
+          下一回合就不用再填了。</p>
+
+        <h3>填错了怎么改 / 删</h3>
+        <p>点精灵卡打开编辑：每个招式右边有个 <b>✕</b>，点一下就删掉这一招；点招式本身可以换成别的。<br>
+          整只录错了：<b>☰ → 数据（精灵配招库）</b>，每只右边也有 <b>✕</b>，删掉后朋友那边也会同步删掉。<br>
+          如果选的招式这只精灵一般学不会（多半是点错了），会让你确认一次，选「不加」就行。</p>
+
+        <h3>三个提速技巧</h3>
+        <p>①<b>任意位置 Ctrl+V</b> 就能识图，不用先点「识图」；②键盘 <b>1 / 2 / 3</b> 选推荐、<b>回车</b> 结算；
+          ③用<b>悬浮窗</b>，游戏和助手并排（先开「启动助手.bat」，再双击「悬浮窗.bat」）。</p>
+        <p>对手的道具看不到：助手会按你库里同一只以前带过的道具<b>推测</b>（卡片上写「推测：X」），也算进伤害。</p>
+
+        <h3>数值是按这个池子的规则算的</h3>
+        <p>个体值全满、努力值每项 85、性格按中性。满血值可以手填（个体值随机，算不出来就填真实值）。<br>
+          能力变化：和后台第 4 只交换会清掉；场上 3 只之间轮转<b>不清</b>。白色香草会自动清掉下降。</p>
+
+        <h3>血量不准怎么办</h3>
+        <p>点精灵卡 →「✎ 修正」里最上面有 <b>满血值</b>，填游戏里这只的<span>最大血量</span>（比如纽拉 206），
+          再拖动百分比条。填过一次之后会记住，下次同一只精灵直接用。</p>
+
+        <h3>“轮转”是怎么算的</h3>
+        <p>你场上的 3 只都能在任意回合直接接手上场并当回合出招，不消耗额外回合；对手的攻击会打在你<b>轮转上场的那只</b>身上。所以每回合的推荐本质是「3 只 × 各自的招式」里挑最优，外加「换上第 4 只」这个不吃伤害但也不输出的选项。</p>
+
+        <h3>它是怎么判断“最优”的</h3>
+        <ul>
+          <li>用第五世代的伤害公式模拟每个候选操作；</li>
+          <li>对你可能的每个操作 × 对手可能的每个操作（已知招式 + 未知时按最强招估算 + 换人）全部推演一遍；</li>
+          <li>按<b>最坏情况为主（65%）+ 平均情况（35%）</b>打分，再对前几名多推演一回合；</li>
+          <li>分数换算成 0–100% 的胜率估计——这是相对参考，不是绝对概率。</li>
+        </ul>
+
+        <h3>数据</h3>
+        <p>内置第五世代（1–649 号）精灵、招式、特性、道具，共 <span id="dataStat">—</span>。全部离线运行，不联网、不上传任何数据。</p>
+
+        <h3>小技巧</h3>
+        <ul>
+          <li>优先看<b>胜率最高的那张卡</b>，但也要看它下面写的「对谁多少伤害」——有时第二张更稳。</li>
+          <li>对手的招式每暴露一个就补进去，推荐会明显变准。</li>
+          <li>血量填得越准，判断越准。别嫌麻烦，点一下「修正」就行。</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <nav class="tabbar">
+    <button class="tab" data-tab="battle">⚔️<span>对战</span></button>
+    <button class="tab" data-tab="setup">🧩<span>队伍</span></button>
+    <button class="tab" data-tab="help">💡<span>说明</span></button>
+  </nav>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card">
+    <div class="modal-head"><b id="modalTitle"></b><button class="icon-btn" id="modalClose">✕</button></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

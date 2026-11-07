@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: pokeassist
+    runtime: python
+    plan: free
+    buildCommand: "python -c \"print('no build needed')\""
+    startCommand: "python server.py"
+    envVars:
+      - key: PYTHONIOENCODING
+        value: utf-8
