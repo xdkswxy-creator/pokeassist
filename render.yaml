@@ -4,7 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: "python -c \"print('no build needed')\""
-    startCommand: "python server.py"
+    startCommand: "python3 server.py"
     envVars:
       - key: PYTHONIOENCODING
         value: utf-8
